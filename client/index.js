@@ -21,7 +21,7 @@ var currentRequests = 5, token, ws;
 // Register on click
 registerBtn.addEventListener('click', () => {
     if (resgisterEmail.value != '' && registerPassword.value != '') {
-        login('https://localhost:8000/register', {
+        login('https://localhost:8080/register', {
             email: resgisterEmail.value,
             password: registerPassword.value
         }).then(res => {
@@ -43,7 +43,7 @@ registerBtn.addEventListener('click', () => {
 // Login on click
 loginBtn.addEventListener('click', () => {
     if (loginEmail.value != '' && loginPassword.value != '') {
-        login('https://localhost:8000/login', {
+        login('https://localhost:8080/login', {
             email: loginEmail.value,
             password: loginPassword.value
         }).then(res => {
