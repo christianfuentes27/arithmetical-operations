@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  mongo:
+    container_name: mongo-db
+    image: mongo
+    volumes:
+      - /data/mongodb/db:/data/db
+    ports:
+      - 27017:27017
+
+  app:
+    container_name: node-app
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+
+  proxy:
+    container_name: node-proxy
+    image: nginx
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/nginx.conf
+    ports:
+      - 8080:443
+    

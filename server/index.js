@@ -11,10 +11,10 @@ const cors = require('cors');
 const User = require('../database/model.js');
 const Joi = require('@hapi/joi');
 const { default: mongoose } = require('mongoose');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 
 // Uri connection to mongodb
-const uri = "mongodb://mongoadmin:secret@127.0.0.1:1888";
+const uri = "mongodb://mongo:27017";
 // Mongodb Client
 const client = new mongodb.MongoClient(uri);
 // Connect to database
@@ -43,6 +43,10 @@ const server = app.listen(3000, () => {
 const schemaLogin = Joi.object({
     email: Joi.string().min(6).max(255).required().email(),
     password: Joi.string().min(6).required()
+});
+
+app.get('/test', async (req, res) => {
+    res.send({'message': 'all ok'});
 });
 
 // Register user
