@@ -21,7 +21,7 @@ var currentRequests = 5, token, ws;
 // Register on click
 registerBtn.addEventListener('click', () => {
     if (resgisterEmail.value != '' && registerPassword.value != '') {
-        login('https://localhost:8080/register', {
+        login('https://node-proxy:8080/register', {
             email: resgisterEmail.value,
             password: registerPassword.value
         }).then(res => {

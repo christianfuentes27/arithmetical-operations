@@ -4,19 +4,28 @@ const jwt = require("jsonwebtoken");
 const path = require('path');
 const url = require('url');
 const runner = require('child_process');
-var mongodb = require('mongodb');
-var mongoDbQueue = require('mongodb-queue-up');
 require('dotenv').config();
 const cors = require('cors');
 const User = require('../database/model.js');
 const Joi = require('@hapi/joi');
 const { default: mongoose } = require('mongoose');
 const bcrypt = require('bcrypt');
+// Task queue
+const Queue = require('bull');
+const { result } = require('@hapi/joi/lib/base.js');
+const queue = new Queue("myQueue", {
+    redis: {
+        host: 'redis',
+        port: 6379
+    },
+    limiter: {
+        max: 1000,
+        duration: 5000
+    }
+});
 
 // Uri connection to mongodb
 const uri = "mongodb://mongo:27017";
-// Mongodb Client
-const client = new mongodb.MongoClient(uri);
 // Connect to database
 mongoose.connect(uri)
     .then(() => {
@@ -128,43 +137,30 @@ wss.on('connection', (ws, req) => {
                 ws.send("Your token is no longer valid.<br>");
                 ws.close();
             } else {
-                await client.connect();
-                // Get 'test' db
-                const db = client.db('test');
-                // Create task queue on 'test' db
-                const queue = mongoDbQueue(db, 'my-queue');
                 // Add job to queue
-                setTimeout(() => {
-                    addJobToQueue(queue, data.operation).then(() => {
-                        // If job has been correctly added, process it
-                        queue.get((err, job) => {
-                            // Execute the parser passing through params the input arithmetic operation checking 
-                            // if it is correct or not
-                            console.log(job);
-                            if (job != undefined) {
-                                runner.exec(`node ./js/parser.js ${job.payload}`, function (err, response) {
-                                    if (err) ws.send('Error: ' + err);
-                                    else ws.send(response);
-                                });
-                                // After processing job, remove it from the queue
-                                queue.ack(job.ack, (err, id) => {
-                                    console.log('Job removed from the queue');
-                                });
-                                queue.clean((err) => {
-                                    console.log('The processed jobs have been deleted');
-                                });
-                            }
-                        });
-                    });
-                }, (Math.floor(Math.random() * 5000)));
+                addJob(data);
+
+                queue.on('completed', (job, result) => {
+                    ws.send(result);
+                });
+
+                queue.on('failed', (job, result) => {
+                    ws.send(result);
+                });
             }
         });
     });
 });
 
-// Adding job to task queue
-async function addJobToQueue(queue, data) {
-    await queue.add(data, function (err, id) {
-        console.log('Added to queue');
-    });
-}
+const addJob = async (data) => {
+    await queue.add(data);
+};
+
+queue.process((job) => {
+    setTimeout(() => {
+        runner.exec(`node ../grammar/parser.js ${job.data}`, function (err, response) {
+            if (err) return Promise.reject(err);
+            else return Promise.resolve(response);
+        });
+    }, (Math.floor(Math.random() * 5000)));
+});
