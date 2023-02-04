@@ -21,7 +21,7 @@ var currentRequests = 5, token, ws;
 // Register on click
 registerBtn.addEventListener('click', () => {
     if (resgisterEmail.value != '' && registerPassword.value != '') {
-        login('https://node-proxy:8080/register', {
+        login('http://localhost:8000/register', {
             email: resgisterEmail.value,
             password: registerPassword.value
         }).then(res => {
@@ -43,7 +43,7 @@ registerBtn.addEventListener('click', () => {
 // Login on click
 loginBtn.addEventListener('click', () => {
     if (loginEmail.value != '' && loginPassword.value != '') {
-        login('https://localhost:8080/login', {
+        login('https://localhost:8000/login', {
             email: loginEmail.value,
             password: loginPassword.value
         }).then(res => {
@@ -154,8 +154,7 @@ async function login(url, data) {
     const response = await fetch(url, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Origin': "http://localhost:3000"
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
     });

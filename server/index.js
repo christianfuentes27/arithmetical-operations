@@ -12,7 +12,6 @@ const { default: mongoose } = require('mongoose');
 const bcrypt = require('bcrypt');
 // Task queue
 const Queue = require('bull');
-const { result } = require('@hapi/joi/lib/base.js');
 const queue = new Queue("myQueue", {
     redis: {
         host: 'redis',
@@ -41,7 +40,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 // Make html's dependencies working correctly
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..', '/client')));
 
 // Server listening on port 3000
 const server = app.listen(3000, () => {
@@ -52,6 +51,10 @@ const server = app.listen(3000, () => {
 const schemaLogin = Joi.object({
     email: Joi.string().min(6).max(255).required().email(),
     password: Joi.string().min(6).required()
+});
+
+app.get('/', async (req, res) => {
+    res.sendFile(path.join(__dirname, '..', '/client/index.html'));
 });
 
 // Register user
