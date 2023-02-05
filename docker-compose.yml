@@ -38,8 +38,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ./certificates/server.key:/app/certificates/server.key
-      - ./certificates/server.crt:/app/certificates/server.crt
+      - ./certificates:/app/certificates
 
 volumes:
   cache:

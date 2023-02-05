@@ -1,52 +1,19 @@
 const loginBtn = document.getElementById('login-btn');
-const registerBtn = document.getElementById('register-btn');
 const sendBtn = document.getElementById('send-btn');
-const loginEmail = document.getElementById('loginEmail');
-const loginPassword = document.getElementById('loginPassword');
-const resgisterEmail = document.getElementById('registerEmail');
-const registerPassword = document.getElementById('registerPassword');
 const loginContainer = document.querySelector('.login');
-const registerContainer = document.querySelector('.register');
 const regexContainer = document.querySelector('.regex-container');
 const reguex = document.getElementById('reguex');
 const message = document.querySelector('.message');
 const requests = document.querySelector('.requests');
 const loader = document.querySelector('.lds-ellipsis');
 const done = document.querySelector('.done');
-const signUpBtn = document.getElementById('signUpBtn');
-const signInBtn = document.getElementById('signInBtn');
 const alert = document.querySelector('.alert');
 var currentRequests = 5, token, ws;
 
-// Register on click
-registerBtn.addEventListener('click', () => {
-    if (resgisterEmail.value != '' && registerPassword.value != '') {
-        login('https://localhost:8000/register', {
-            email: resgisterEmail.value,
-            password: registerPassword.value
-        }).then(res => {
-            alert.style.display = "block";
-            if (res.error != undefined) {
-                alert.style.background = "#A11616";
-                alert.innerHTML = res.error;
-            } else {
-                alert.style.display = "block";
-                alert.innerHTML = "User registered successfully";
-                alert.style.background = "#0FC956";
-                loginContainer.style.display = "flex";
-                registerContainer.style.display = "none";
-            }
-        }).catch((e) => console.log(e));
-    }
-});
-
 // Login on click
 loginBtn.addEventListener('click', () => {
-    if (loginEmail.value != '' && loginPassword.value != '') {
-        login('https://localhost:8000/login', {
-            email: loginEmail.value,
-            password: loginPassword.value
-        }).then(res => {
+    login('https://localhost:8000/login')
+        .then(res => {
             // If login is successful, save token and open the connection 
             // with WebSocketServer 
             if (res.error != undefined) {
@@ -61,19 +28,6 @@ loginBtn.addEventListener('click', () => {
                 checkAuth();
             }
         }).catch((e) => console.log(e));
-    }
-});
-
-// Sing up listener
-signUpBtn.addEventListener('click', () => {
-    loginContainer.style.display = "none";
-    registerContainer.style.display = "flex";
-});
-
-// Sing in listener
-signInBtn.addEventListener('click', () => {
-    loginContainer.style.display = "flex";
-    registerContainer.style.display = "none";
 });
 
 // Send regular expression to websocket on click
@@ -143,20 +97,18 @@ function openWsConnection(token) {
 
 function checkAuth() {
     if (token != undefined || token != null) {
-        registerContainer.style.display = "none";
         loginContainer.style.display = "none";
         regexContainer.style.display = "flex";
     }
 }
 
 // Login fetch to express server
-async function login(url, data) {
+async function login(url) {
     const response = await fetch(url, {
-        method: 'POST',
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+        }
     });
     return response.json();
 }

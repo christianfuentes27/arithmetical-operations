@@ -6,10 +6,7 @@ const url = require('url');
 const runner = require('child_process');
 require('dotenv').config();
 const cors = require('cors');
-const User = require('../database/model.js');
-const Joi = require('@hapi/joi');
 const { default: mongoose } = require('mongoose');
-const bcrypt = require('bcrypt');
 // Task queue
 const Queue = require('bull');
 const queue = new Queue("myQueue", {
@@ -47,65 +44,16 @@ const server = app.listen(3000, () => {
     console.log("Server running on port 3000");
 });
 
-// Set validation schema
-const schemaLogin = Joi.object({
-    email: Joi.string().min(6).max(255).required().email(),
-    password: Joi.string().min(6).required()
-});
-
-// app.get('/', async (req, res) => {
-//     res.sendFile(path.join(__dirname, '..', '/client/index.html'));
-// });
-
-// Register user
-app.post('/register', async (req, res) => {
-    // Login schema validation
-    const { error } = schemaLogin.validate(req.body);
-    if (error) return res.status(400).json({ error: error.details[0].message });
-
-    // Check if email exists
-    const isEmailExist = await User.findOne({ email: req.body.email });
-    if (isEmailExist) return res.status(400).json({ error: 'Email already taken' });
-
-    // Encrypt password
-    const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash(req.body.password, salt);
-
-    // Create user using the model
-    const user = new User({
-        email: req.body.email,
-        password
-    });
-
-    // Save user into database
-    try {
-        const savedUser = await user.save();
-        res.json({
-            error: null,
-            data: savedUser
-        });
-    } catch (error) {
-        res.status(400).json({ error });
-    }
+app.get('/', async (req, res) => {
+    res.sendFile(path.join(__dirname, '..', '/client/index.html'));
 });
 
 // Receiving client's credentials and response with a token with a time no longer 
 // than 10 minutes
-app.post("/login", async (req, res) => {
-    // Login schema validation
-    const { error } = schemaLogin.validate(req.body);
-    if (error) return res.status(400).json({ error: error.details[0].message });
-    // Email existence validation
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(400).json({ error: 'User not found' });
-    // Password validation
-    const validPassword = await bcrypt.compare(req.body.password, user.password);
-    if (!validPassword) return res.status(400).json({ error: 'Invalid credentials' });
-
+app.get("/login", async (req, res) => {
     // Create token
     const token = jwt.sign({
-        email: user.email,
-        id: user._id
+        serialNumber: req.headers['serialNumber']
     }, process.env.TOKEN_SECRET, {
         expiresIn: '10m'
     });
