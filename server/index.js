@@ -53,9 +53,9 @@ const schemaLogin = Joi.object({
     password: Joi.string().min(6).required()
 });
 
-app.get('/', async (req, res) => {
-    res.sendFile(path.join(__dirname, '..', '/client/index.html'));
-});
+// app.get('/', async (req, res) => {
+//     res.sendFile(path.join(__dirname, '..', '/client/index.html'));
+// });
 
 // Register user
 app.post('/register', async (req, res) => {
@@ -143,12 +143,13 @@ wss.on('connection', (ws, req) => {
                 // Add job to queue
                 addJob(data);
 
+                // When job is completed
                 queue.on('completed', (job, result) => {
-                    ws.send(result);
-                });
-
-                queue.on('failed', (job, result) => {
-                    ws.send(result);
+                    result.stdout.on('data', (data) => {
+                        setTimeout(() => {
+                            ws.send(data);
+                        }, Math.floor(Math.random() * 5000) + 1000);
+                    });
                 });
             }
         });
@@ -160,10 +161,8 @@ const addJob = async (data) => {
 };
 
 queue.process((job) => {
-    setTimeout(() => {
-        runner.exec(`node ../grammar/parser.js ${job.data}`, function (err, response) {
-            if (err) return Promise.reject(err);
-            else return Promise.resolve(response);
-        });
-    }, (Math.floor(Math.random() * 5000)));
+    return runner.exec(`node ${path.join(__dirname, '..', '/grammar/parser.js')} ${job.data.operation}`, async function (err, response) {
+        if (err) return 'Error: ' + err;
+        else return response;
+    });
 });

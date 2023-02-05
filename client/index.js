@@ -21,7 +21,7 @@ var currentRequests = 5, token, ws;
 // Register on click
 registerBtn.addEventListener('click', () => {
     if (resgisterEmail.value != '' && registerPassword.value != '') {
-        login('http://localhost:8000/register', {
+        login('https://localhost:8000/register', {
             email: resgisterEmail.value,
             password: registerPassword.value
         }).then(res => {

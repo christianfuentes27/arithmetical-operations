@@ -37,16 +37,9 @@ services:
       dockerfile: /proxy/Dockerfile
     ports:
       - 8000:8000
-
-  # proxy:
-  #   container_name: node-proxy
-  #   image: nginx
-  #   volumes:
-  #     - ./default.conf:/etc/nginx/conf.d/nginx.conf
-  #     - ./certificates/server.key:/etc/nginx/server_certs/server.key
-  #     - ./certificates/server.crt:/etc/nginx/server_certs/server.crt
-  #   ports:
-  #     - 8080:443
+    volumes:
+      - ./certificates/server.key:/app/certificates/server.key
+      - ./certificates/server.crt:/app/certificates/server.crt
 
 volumes:
   cache:

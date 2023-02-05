@@ -10,6 +10,5 @@ COPY ./grammar ./grammar
 COPY ./server ./server
 COPY ./.env ./.env
 COPY ./.gitignore ./.gitignore
-COPY ./default.conf ./default.conf
 
 CMD ["node", "/app/server/index.js"]
