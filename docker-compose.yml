@@ -1,13 +1,29 @@
-version: '3.7'
+version: '3'
 
 services:
-  mongo:
-    container_name: mongo-db
-    image: mongo
-    volumes:
-      - ./database/db:/data/db
+  app:
+    container_name: app-server
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - 27017:27017
+      - 3000:3000
+  
+  api: 
+    container_name: api-rest
+    build: 
+      context: .
+      dockerfile: /api/Dockerfile
+    ports:
+      - 4000:4000
+  
+  proxy:
+    container_name: proxy-docker
+    build: 
+      context: .
+      dockerfile: /proxy/Dockerfile
+    ports:
+      - 5000:5000
 
   redis:
     container_name: redis-queue
@@ -18,29 +34,7 @@ services:
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - cache:/data
-    
-  app:
-    container_name: node-app
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 3000:3000
-    depends_on:
-      - mongo
-      - redis
-
-  proxy: 
-    container_name: proxy-server
-    build:
-      context: .
-      dockerfile: /proxy/Dockerfile
-    ports:
-      - 8000:8000
-    volumes:
-      - ./certificates:/app/certificates
 
 volumes:
   cache:
     driver: local
-    

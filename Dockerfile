@@ -1,14 +1,11 @@
-FROM node:alpine
+FROM node
 
 WORKDIR /app
+COPY ./server ./server
+COPY ./client ./client
+COPY ./certificates ./certificates
 COPY ./package*.json .
 RUN npm ci
-COPY ./certificates ./certificates
-COPY ./client ./client
-COPY ./database ./database
-COPY ./grammar ./grammar
-COPY ./server ./server
-COPY ./.env ./.env
-COPY ./.gitignore ./.gitignore
+EXPOSE 3000
 
-CMD ["node", "/app/server/index.js"]
+CMD [ "node", "/app/server/index.js" ]
